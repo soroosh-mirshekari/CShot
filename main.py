@@ -1,5 +1,7 @@
 import pygame
 import sys
+from random import randint
+from Entities import *
 
 pygame.init()
 
@@ -7,6 +9,7 @@ WIDTH, HEIGHT = 1000, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("CShot")
 
+# Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 LIGHT_BLUE = (173, 216, 230)
@@ -18,6 +21,12 @@ DARK_RED = (139, 0, 0)
 YELLOW = (245, 210, 34)
 GRAY = (100, 100, 100)
 CUSTOM_RED = (245, 93, 34)
+DARK_BG = (30, 30, 30)
+LIGHT_BORDER = (200, 200, 200)
+AIM1_COLOR = (255, 0, 0)  
+AIM2_COLOR = (0, 255, 0)  
+AIM_SIZE = 2
+AIM_SPEED = 0.25
 
 TITLE_FONT = pygame.font.Font(None, 100)
 BUTTON_FONT = pygame.font.Font(None, 50)
@@ -115,8 +124,27 @@ def main_menu():
         pygame.display.flip()
 
 def start_game():
-    print("Start Game")
-    pygame.time.wait(400)
+    BORDER_THICKNESS = 5
+
+    # Aim properties (putting color for aims to test the game faster)
+    aim_1 = Aim(BORDER_THICKNESS,WIDTH,HEIGHT,screen,AIM_SPEED,AIM_SIZE,AIM1_COLOR,[pygame.K_w,pygame.K_s,pygame.K_a,pygame.K_d])
+    aim_2 = Aim(BORDER_THICKNESS,WIDTH,HEIGHT,screen,AIM_SPEED,AIM_SIZE,AIM2_COLOR,[pygame.K_UP,pygame.K_DOWN,pygame.K_LEFT,pygame.K_RIGHT])
+
+    # place aims 
+    aim_1.random_placement()
+    aim_2.random_placement()
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        # Get pressed keys
+        keys = pygame.key.get_pressed()
+        aim_1.press_key(keys)
+        aim_2.press_key(keys)
+
 
 def leaderboard():
     print("Leaderboard")
