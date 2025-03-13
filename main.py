@@ -28,17 +28,20 @@ AIM2_COLOR = (0, 255, 0)
 AIM_SIZE = 2
 AIM_SPEED = 0.25
 
+# Fonts
 TITLE_FONT = pygame.font.Font(None, 100)
 BUTTON_FONT = pygame.font.Font(None, 50)
 MUTE_FONT = pygame.font.Font(None, 35)
+ERROR_FONT = pygame.font.Font(None, 40)
 
+# Menu options
 menu_options = [
     {"text": "Start Game", "color": LIGHT_BLUE, "hover_color": DARK_BLUE},
     {"text": "Leaderboard", "color": LIGHT_GREEN, "hover_color": DARK_GREEN},
     {"text": "Exit", "color": LIGHT_RED, "hover_color": DARK_RED},
 ]
 
-
+# Music state
 is_music_paused = False 
 
 def play_background_music():
@@ -50,15 +53,15 @@ def play_background_music():
         print(f"Could not load music file: {e}")
 
 def draw_menu(selected=None):
-    
+    # Draw gradient background
     for y in range(HEIGHT):
         pygame.draw.line(screen, (YELLOW[0], YELLOW[1] - int(y / 5), YELLOW[2]), (0, y), (WIDTH, y))
 
-   
+    # Draw title
     title_surface = TITLE_FONT.render("CShot", True, CUSTOM_RED)
     screen.blit(title_surface, (WIDTH // 2 - title_surface.get_width() // 2, 50))
 
- 
+    # Draw menu buttons
     button_rects = []
     for index, option in enumerate(menu_options):
         rect_x, rect_y = WIDTH // 2 - 150, 200 + index * 100
@@ -74,7 +77,7 @@ def draw_menu(selected=None):
 
         button_rects.append(pygame.Rect(rect_x, rect_y, rect_width, rect_height))
 
-   
+    # Draw mute button
     mute_button_rect = pygame.Rect(20, HEIGHT - 60, 100, 40)  
     pygame.draw.rect(screen, DARK_RED, mute_button_rect, border_radius=10)  
     mute_text = "Mute" if not is_music_paused else "Unmute"
@@ -84,6 +87,140 @@ def draw_menu(selected=None):
 
     pygame.display.flip()
     return button_rects, mute_button_rect
+
+def get_player_names():
+    input_box1 = pygame.Rect(WIDTH // 2 - 100, HEIGHT // 2 - 50, 200, 40)
+    input_box2 = pygame.Rect(WIDTH // 2 - 100, HEIGHT // 2 + 10, 200, 40)
+    color_inactive = pygame.Color('lightskyblue3')
+    color_active = pygame.Color('dodgerblue2')
+    color1 = color_inactive
+    color2 = color_inactive
+    active1 = False
+    active2 = False
+    text1 = ''
+    text2 = ''
+    font = pygame.font.Font(None, 32)
+    error_message = ''
+    done = False
+
+    while not done:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if input_box1.collidepoint(event.pos):
+                    active1 = not active1
+                    active2 = False
+                elif input_box2.collidepoint(event.pos):
+                    active2 = not active2
+                    active1 = False
+                else:
+                    active1 = False
+                    active2 = False
+                color1 = color_active if active1 else color_inactive
+                color2 = color_active if active2 else color_inactive
+            if event.type == pygame.KEYDOWN:
+                if active1:
+                    if event.key == pygame.K_RETURN:
+                        if text1.strip() == "" or text2.strip() == "":  # Check if either name is empty
+                            error_message = "Both player names must be filled!"
+                        else:
+                            error_message = ''
+                            done = True
+                    elif event.key == pygame.K_BACKSPACE:
+                        text1 = text1[:-1]
+                    else:
+                        text1 += event.unicode
+                elif active2:
+                    if event.key == pygame.K_RETURN:
+                        if text1.strip() == "" or text2.strip() == "":  # Check if either name is empty
+                            error_message = "Both player names must be filled!"
+                        else:
+                            error_message = ''
+                            done = True
+                    elif event.key == pygame.K_BACKSPACE:
+                        text2 = text2[:-1]
+                    else:
+                        text2 += event.unicode
+
+        # Draw gradient green background
+        for y in range(HEIGHT):
+            gradient_green = (0, min(255, 100 + int(y / HEIGHT * 155)), 0)  # Gradient from dark to light green
+            pygame.draw.line(screen, gradient_green, (0, y), (WIDTH, y))
+
+        # Draw input boxes
+        txt_surface1 = font.render(text1, True, BLACK)
+        txt_surface2 = font.render(text2, True, BLACK)
+        width1 = max(200, txt_surface1.get_width() + 10)
+        width2 = max(200, txt_surface2.get_width() + 10)
+        input_box1.w = width1
+        input_box2.w = width2
+        screen.blit(txt_surface1, (input_box1.x + 5, input_box1.y + 5))
+        screen.blit(txt_surface2, (input_box2.x + 5, input_box2.y + 5))
+        pygame.draw.rect(screen, color1, input_box1, 2)
+        pygame.draw.rect(screen, color2, input_box2, 2)
+
+        # Draw labels
+        label1 = font.render("Player 1:", True, WHITE)
+        label2 = font.render("Player 2:", True, WHITE)
+        screen.blit(label1, (input_box1.x - 100, input_box1.y + 5))
+        screen.blit(label2, (input_box2.x - 100, input_box2.y + 5))
+
+        # Send error message
+        if error_message:
+            error_surface = ERROR_FONT.render(error_message, True, DARK_RED)
+            screen.blit(error_surface, (WIDTH // 2 - error_surface.get_width() // 2, HEIGHT // 2 + 70))
+
+        pygame.display.flip()
+
+    return text1, text2
+
+
+def start_game():
+    player1_name, player2_name = get_player_names()
+
+    BORDER_THICKNESS = 5
+
+    # Create Aim objects
+    aim_1 = Aim(BORDER_THICKNESS, WIDTH, HEIGHT, screen, AIM_SPEED, AIM_SIZE, AIM1_COLOR, [pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d])
+    aim_2 = Aim(BORDER_THICKNESS, WIDTH, HEIGHT, screen, AIM_SPEED, AIM_SIZE, AIM2_COLOR, [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT])
+
+    # Randomly place aims
+    aim_1.random_placement()
+    aim_2.random_placement()
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        # Get pressed keys
+        keys = pygame.key.get_pressed()
+        aim_1.press_key(keys)
+        aim_2.press_key(keys)
+
+        # Draw background
+        screen.fill(DARK_BG)
+
+        # Draw player names
+        font = pygame.font.Font(None, 25)
+        player1_text = font.render(f"Player 1: {player1_name}", True, LIGHT_GREEN)
+        player2_text = font.render(f"Player 2: {player2_name}", True, LIGHT_BLUE)
+        screen.blit(player1_text, (20, 20))
+        screen.blit(player2_text, (20, 60))
+
+        # Draw aims
+        aim_1.draw()
+        aim_2.draw()
+
+        # Update the display
+        pygame.display.flip()
+
+def leaderboard():
+    print("Leaderboard")
+    pygame.time.wait(400)
 
 def main_menu():
     global is_music_paused 
@@ -122,33 +259,6 @@ def main_menu():
                             pygame.quit()
                             sys.exit()
         pygame.display.flip()
-
-def start_game():
-    BORDER_THICKNESS = 5
-
-    # Aim properties (putting color for aims to test the game faster)
-    aim_1 = Aim(BORDER_THICKNESS,WIDTH,HEIGHT,screen,AIM_SPEED,AIM_SIZE,AIM1_COLOR,[pygame.K_w,pygame.K_s,pygame.K_a,pygame.K_d])
-    aim_2 = Aim(BORDER_THICKNESS,WIDTH,HEIGHT,screen,AIM_SPEED,AIM_SIZE,AIM2_COLOR,[pygame.K_UP,pygame.K_DOWN,pygame.K_LEFT,pygame.K_RIGHT])
-
-    # place aims 
-    aim_1.random_placement()
-    aim_2.random_placement()
-
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-        # Get pressed keys
-        keys = pygame.key.get_pressed()
-        aim_1.press_key(keys)
-        aim_2.press_key(keys)
-
-
-def leaderboard():
-    print("Leaderboard")
-    pygame.time.wait(400)
 
 if __name__ == "__main__":
     play_background_music() 
