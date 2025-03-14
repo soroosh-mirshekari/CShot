@@ -10,6 +10,19 @@ DIAMETER = pow(1000**2 + 600**2,0.5)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("CShot")
 
+# Load sound effects
+shoot_sound = pygame.mixer.Sound("shoot_sound.mp3")
+target_destroyed_sound = pygame.mixer.Sound("target_destroyed.mp3")
+game_over_sound = pygame.mixer.Sound("game_over.mp3")
+game_start_sound = pygame.mixer.Sound("ready_start.mp3")
+
+# Adjust volumes (optional)
+shoot_sound.set_volume(0.5)
+target_destroyed_sound.set_volume(0.7)
+game_over_sound.set_volume(1.0)
+game_start_sound.set_volume(1.0)
+
+
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -181,11 +194,13 @@ def get_player_names():
 
 def player_shots(aim, targets):
     aim.shot()
+    shoot_sound.play()  # Play shoot sound
     for target in targets:
-        if aim.check_collision(target): # Collision check
+        if aim.check_collision(target):  # Collision check
             target.random_placement()
+            target_destroyed_sound.play()  # Play target destroyed sound
             return True
-    return False 
+    return False
 
 def score_scale(aim):
     aim_xy = aim.xy_axis()
@@ -201,6 +216,7 @@ def score_scale(aim):
     else : return 1
 
 def display_results(player1_name, player2_name, score1, score2):
+    game_over_sound.play()
     screen.fill((0, 0, 0))  # Clear screen with black
 
     # Draw gradient purple background
@@ -243,6 +259,7 @@ def display_results(player1_name, player2_name, score1, score2):
                 waiting = False
 
 def start_game():
+    
     player1_name, player2_name = get_player_names()
 
     BORDER_THICKNESS = 5
@@ -268,6 +285,7 @@ def start_game():
     ammo.random_placement()
     timer.random_placement()
     multiplier.random_placement()
+    game_start_sound.play()
 
     # Initialize shot counters
     player1_shots = 15 
@@ -386,7 +404,7 @@ def start_game():
         player1_text = font.render(f"Player 1: {player1_name} - Bullets: {player1_shots} - Timer: {player1_timer.seconds} - Score: {score1}", True, LIGHT_GREEN)
         screen.blit(player1_text, (20, 20))
         player2_text = font.render(f"Player 2: {player2_name} - Bullets: {player2_shots} - Timer: {player2_timer.seconds} - Score: {score2}", True, LIGHT_BLUE)
-        screen.blit(player2_text, (WIDTH - 380, 20))  
+        screen.blit(player2_text, (WIDTH - 450, 20))  
 
         # Check if time is up or both players are out of shots
         if (player1_timer.total_seconds() <= 0 and player2_timer.total_seconds() <= 0) or (player1_shots <= 0 and player2_shots <= 0) or (player1_timer.total_seconds() <= 0 and player2_shots <= 0) or (player2_timer.total_seconds() <= 0 and player1_shots <= 0):
