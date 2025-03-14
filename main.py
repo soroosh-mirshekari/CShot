@@ -1,6 +1,5 @@
 import pygame
 import sys
-from random import randint
 from Entities import *
 
 pygame.init()
@@ -26,7 +25,7 @@ LIGHT_BORDER = (200, 200, 200)
 AIM1_COLOR = (255, 0, 0)  
 AIM2_COLOR = (0, 255, 0)  
 AIM_SIZE = 2
-AIM_SPEED = 0.25
+AIM_SPEED = 0.5
 
 # Fonts
 TITLE_FONT = pygame.font.Font(None, 100)
@@ -176,6 +175,11 @@ def get_player_names():
 
     return text1, text2
 
+def player_shots(aim, targets):
+    aim.shot()
+    for target in targets:
+        if aim.check_collision(target): # Collision check
+            target.random_placement()
 
 def start_game():
     player1_name, player2_name = get_player_names()
@@ -186,15 +190,30 @@ def start_game():
     aim_1 = Aim(BORDER_THICKNESS, WIDTH, HEIGHT, screen, AIM_SPEED, AIM_SIZE, AIM1_COLOR, [pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d])
     aim_2 = Aim(BORDER_THICKNESS, WIDTH, HEIGHT, screen, AIM_SPEED, AIM_SIZE, AIM2_COLOR, [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT])
 
-    # Randomly place aims
+    # Create Targets
+    target_1 = Target(BORDER_THICKNESS, WIDTH, HEIGHT, screen)
+    target_2 = Target(BORDER_THICKNESS, WIDTH, HEIGHT, screen)
+    target_3 = Target(BORDER_THICKNESS, WIDTH, HEIGHT, screen)
+    targets = [target_1, target_2, target_3]
+
+    # Randomly place aims and targets
     aim_1.random_placement()
     aim_2.random_placement()
+    for target in targets:
+        target.random_placement()
 
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:  # Check for spacebar press
+                    player_shots(aim_1, targets)
+                
+                if event.key == pygame.K_KP_0: # check for 0 keypad press
+                    player_shots(aim_2, targets)
 
         # Get pressed keys
         keys = pygame.key.get_pressed()
@@ -211,9 +230,11 @@ def start_game():
         screen.blit(player1_text, (20, 20))
         screen.blit(player2_text, (20, 60))
 
-        # Draw aims
+        # Draw objects
         aim_1.draw()
         aim_2.draw()
+        for target in targets:
+            target.draw()
 
         # Update the display
         pygame.display.flip()
