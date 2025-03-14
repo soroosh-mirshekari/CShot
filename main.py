@@ -236,8 +236,8 @@ def start_game():
     player2_missed = True
 
     # Initialize timers
-    player1_timer = timedelta(seconds=35) 
-    player2_timer = timedelta(seconds=35)
+    player1_timer = timedelta(seconds=60) 
+    player2_timer = timedelta(seconds=60)
     start_time = datetime.now()
 
     ammo_activated = False
@@ -288,7 +288,7 @@ def start_game():
                     # check if player hits timer
                     if timer_activated and aim_2.check_collision(timer):
                         timer_used = True
-                        player2_timer.seconds += timedelta(seconds=15)
+                        player2_timer += timedelta(seconds=15)
 
                     player2_shots -= 1
 
