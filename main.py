@@ -216,6 +216,7 @@ def start_game():
     targets = [target_1, target_2, target_3]
     timer = TimerTarget(BORDER_THICKNESS, WIDTH, HEIGHT, screen)
     ammo = AmmoTarget(BORDER_THICKNESS, WIDTH, HEIGHT, screen)
+    multiplier = MultiplierTarget(BORDER_THICKNESS, WIDTH, HEIGHT, screen)
 
     # Randomly place aims and targets
     aim_1.random_placement()
@@ -224,6 +225,7 @@ def start_game():
         target.random_placement()
     ammo.random_placement()
     timer.random_placement()
+    multiplier.random_placement()
 
     # Initialize shot counters
     player1_shots = 15 
@@ -234,6 +236,8 @@ def start_game():
     score2 = 0
     player1_missed = True
     player2_missed = True
+    player1_multiplier = 1
+    player2_multiplier = 1
 
     # Initialize timers
     player1_timer = timedelta(seconds=60) 
@@ -244,6 +248,10 @@ def start_game():
     timer_activated = False
     ammo_used = False
     timer_used = False
+    multiplier_activated = False
+    multiplier_used = False
+    multiplier_timer = timedelta(seconds=30)
+    multiplier_start_timer = datetime.now()
 
     running = True
     while running:
@@ -255,8 +263,8 @@ def start_game():
                 if event.key == pygame.K_SPACE and player1_shots > 0 and player1_timer.total_seconds() > 0:  # Check for spacebar press
                     if player_shots(aim_1, targets):
                         if player1_missed:
-                            score1 += score_scale(aim_1)
-                        else: score1 += score_scale(aim_1) + 2
+                            score1 += score_scale(aim_1) * player1_multiplier
+                        else: score1 += (score_scale(aim_1) + 2) * player1_multiplier
                         player1_missed = False
                     else: player1_missed = True
 
@@ -270,13 +278,20 @@ def start_game():
                         timer_used = True
                         player1_timer += timedelta(seconds=15)
 
+                    # check if player hits multiplier
+                    if multiplier_activated and aim_1.check_collision(multiplier):
+                        multiplier_used = True
+                        player1_multiplier = 2
+                        multiplier_start_timer = datetime.now()
+                        
+
                     player1_shots -= 1
 
                 if event.key == pygame.K_KP_0 and player2_shots > 0 and player2_timer.total_seconds() > 0:  # check for 0 keypad press
                     if player_shots(aim_2, targets):
                         if player2_missed:
-                            score2 += score_scale(aim_2)
-                        else: score2 += score_scale(aim_2) + 2
+                            score2 += score_scale(aim_2) * player2_multiplier
+                        else: score2 += (score_scale(aim_2) + 2) * player2_multiplier
                         player2_missed = False
                     else: player2_missed = True
 
@@ -290,6 +305,13 @@ def start_game():
                         timer_used = True
                         player2_timer += timedelta(seconds=15)
 
+                    # check if player hits multiplier
+                    if multiplier_activated and aim_2.check_collision(multiplier):
+                        multiplier_used = True
+                        player2_multiplier = 2
+                        multiplier_start_timer = datetime.now()
+
+
                     player2_shots -= 1
 
         if player1_shots <= 5 and player2_shots <= 5:
@@ -297,6 +319,9 @@ def start_game():
 
         if player1_timer.seconds <= 30 and player2_timer.seconds <= 30:
             timer_activated = True
+
+        if abs(score1-score2) >= 10 :
+            multiplier_activated = True
 
         # Update timers
         elapsed_time = datetime.now() - start_time
@@ -338,7 +363,17 @@ def start_game():
             ammo.draw()
         if not timer_used and timer_activated:
             timer.draw()
-        
+        if not multiplier_used and multiplier_activated and multiplier_timer.total_seconds() >= 0:
+            multiplier.draw()
+
+        if multiplier_used and multiplier_timer.total_seconds() >= 0:
+            elapsed_multiplier_time = datetime.now() - multiplier_start_timer
+            multiplier_timer -= elapsed_multiplier_time
+            multiplier_start_timer = datetime.now()
+        else: 
+            player1_multiplier = 1
+            player2_multiplier = 1
+
         # Update the display
         pygame.display.flip()
 
