@@ -200,6 +200,48 @@ def score_scale(aim):
     elif DIAMETER - 699 > distance > DIAMETER - 932: return 2
     else : return 1
 
+def display_results(player1_name, player2_name, score1, score2):
+    screen.fill((0, 0, 0))  # Clear screen with black
+
+    # Draw gradient purple background
+    for y in range(HEIGHT):
+        gradient_purple = min(255, 100 + int(y / HEIGHT * 155)), 0, min(255, 100 + int(y / HEIGHT * 155))
+        pygame.draw.line(screen, gradient_purple, (0, y), (WIDTH, y))
+
+    # Determine the result
+    if score1 > score2:
+        result_text = f"{player1_name} Wins!"
+    elif score2 > score1:
+        result_text = f"{player2_name} Wins!"
+    else:
+        result_text = "It's a Tie!"
+
+    # Render the result
+    result_surface = TITLE_FONT.render(result_text, True, WHITE)
+    screen.blit(result_surface, (WIDTH // 2 - result_surface.get_width() // 2, 100))
+
+    # Render player scores
+    score1_surface = SCORE_FONT.render(f"{player1_name}: {score1} points", True, WHITE)
+    score2_surface = SCORE_FONT.render(f"{player2_name}: {score2} points", True, WHITE)
+    screen.blit(score1_surface, (WIDTH // 2 - score1_surface.get_width() // 2, 250))
+    screen.blit(score2_surface, (WIDTH // 2 - score2_surface.get_width() // 2, 300))
+
+    # Render return to the main menu
+    instruction_surface = SCORE_FONT.render("Press any key to return to the main menu", True, WHITE)
+    screen.blit(instruction_surface, (WIDTH // 2 - instruction_surface.get_width() // 2, 400))
+
+    pygame.display.flip()
+
+    # Wait for any key
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                waiting = False
+
 def start_game():
     player1_name, player2_name = get_player_names()
 
@@ -350,8 +392,11 @@ def start_game():
         if (player1_timer.total_seconds() <= 0 and player2_timer.total_seconds() <= 0) or (player1_shots <= 0 and player2_shots <= 0) or (player1_timer.total_seconds() <= 0 and player2_shots <= 0) or (player2_timer.total_seconds() <= 0 and player1_shots <= 0):
             running = False
             print("Game Over!")
-            print(f"{player1_name} shots: {15 - player1_shots}")
-            print(f"{player2_name} shots: {15 - player2_shots}")
+            print(f"{player1_name} score: {score1}")
+            print(f"{player2_name} score: {score2}")
+
+            # Display results
+            display_results(player1_name, player2_name, score1, score2)
 
         # Draw objects
         aim_1.draw()
