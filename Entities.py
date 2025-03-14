@@ -19,6 +19,7 @@ class Entity(ABC):
     @abstractmethod
     def draw(self):
         pass
+    
 
 class Aim(Entity):
 
@@ -66,6 +67,12 @@ class Aim(Entity):
     
     def check_collision(self, target):
         return self.__rect.colliderect(target.rect)
+    
+    def xy_axis(self):
+        return(self.__x,self.__y)
+
+    def last_shot(self):
+        return self.__shots_xy[-2]
 
 class Target(Entity):
     def __init__(self, border_thickness, width, height, screen):

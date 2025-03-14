@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 pygame.init()
 
 WIDTH, HEIGHT = 1000, 600
+DIAMETER = pow(1000**2 + 600**2,0.5)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("CShot")
 
@@ -26,7 +27,7 @@ LIGHT_BORDER = (200, 200, 200)
 AIM1_COLOR = (255, 0, 0)  
 AIM2_COLOR = (0, 255, 0)  
 AIM_SIZE = 2
-AIM_SPEED = 0.5
+AIM_SPEED = 1.5
 
 # Fonts
 TITLE_FONT = pygame.font.Font(None, 100)
@@ -183,6 +184,21 @@ def player_shots(aim, targets):
     for target in targets:
         if aim.check_collision(target): # Collision check
             target.random_placement()
+            return True
+    return False 
+
+def score_scale(aim):
+    aim_xy = aim.xy_axis()
+    shot_xy = aim.last_shot()
+    x = aim_xy[0] - shot_xy[0]
+    y = aim_xy[1] - shot_xy[1]
+    distance = pow(x**2 + y**2,0.5)
+
+    if DIAMETER > distance > DIAMETER - 233: return 5
+    elif DIAMETER - 233 > distance > DIAMETER - 466: return 4
+    elif DIAMETER - 466 > distance > DIAMETER - 699: return 3
+    elif DIAMETER - 699 > distance > DIAMETER - 932: return 2
+    else : return 1
 
 def start_game():
     player1_name, player2_name = get_player_names()
@@ -209,9 +225,15 @@ def start_game():
     player1_shots = 15 
     player2_shots = 15
 
+    # players score
+    score1 = 0
+    score2 = 0
+    player1_missed = True
+    player2_missed = True
+
     # Initialize timers
-    player1_timer = timedelta(seconds=60) 
-    player2_timer = timedelta(seconds=60)
+    player1_timer = timedelta(seconds=160) 
+    player2_timer = timedelta(seconds=160)
     start_time = datetime.now()
 
     running = True
@@ -222,11 +244,21 @@ def start_game():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and player1_shots > 0 and player1_timer.total_seconds() > 0:  # Check for spacebar press
-                    player_shots(aim_1, targets)
+                    if player_shots(aim_1, targets):
+                        if player1_missed:
+                            score1 += score_scale(aim_1)
+                        else: score1 += score_scale(aim_1) #+ 2
+                        player1_missed = False
+                    else: player1_missed = True
                     player1_shots -= 1
                 
                 if event.key == pygame.K_KP_0 and player2_shots > 0 and player2_timer.total_seconds() > 0:  # check for 0 keypad press
-                    player_shots(aim_2, targets)
+                    if player_shots(aim_2, targets):
+                        if player2_missed:
+                            score2 += score_scale(aim_2)
+                        else: score2 += score_scale(aim_2) #+ 2
+                        player2_missed = False
+                    else: player2_missed = True
                     player2_shots -= 1
 
         # Update timers
@@ -245,10 +277,10 @@ def start_game():
 
         # Draw player names, shot counts, and timers
         font = pygame.font.Font(None, 25)
-        player1_text = font.render(f"Player 1: {player1_name} - Bullets: {player1_shots} - Timer: {player1_timer.seconds}", True, LIGHT_GREEN)
+        player1_text = font.render(f"Player 1: {player1_name} - Bullets: {player1_shots} - Timer: {player1_timer.seconds} - Score: {score1}", True, LIGHT_GREEN)
         screen.blit(player1_text, (20, 20))
-        player2_text = font.render(f"Player 2: {player2_name} - Bullets: {player2_shots} - Timer: {player2_timer.seconds}", True, LIGHT_BLUE)
-        screen.blit(player2_text, (WIDTH - 370, 20))  
+        player2_text = font.render(f"Player 2: {player2_name} - Bullets: {player2_shots} - Timer: {player2_timer.seconds} - Score: {score2}", True, LIGHT_BLUE)
+        screen.blit(player2_text, (WIDTH - 380, 20))  
 
         # Check if time is up or both players are out of shots
         if (player1_timer.total_seconds() <= 0 and player2_timer.total_seconds() <= 0) or (player1_shots <= 0 and player2_shots <= 0):
