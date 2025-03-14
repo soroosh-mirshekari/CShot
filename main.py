@@ -1,6 +1,7 @@
 import pygame
 import sys
 from Entities import *
+from datetime import datetime, timedelta
 
 pygame.init()
 
@@ -32,6 +33,8 @@ TITLE_FONT = pygame.font.Font(None, 100)
 BUTTON_FONT = pygame.font.Font(None, 50)
 MUTE_FONT = pygame.font.Font(None, 35)
 ERROR_FONT = pygame.font.Font(None, 40)
+SCORE_FONT = pygame.font.Font(None, 30)
+TIMER_FONT = pygame.font.Font(None, 40)
 
 # Menu options
 menu_options = [
@@ -202,6 +205,15 @@ def start_game():
     for target in targets:
         target.random_placement()
 
+    # Initialize shot counters
+    player1_shots = 15 
+    player2_shots = 15
+
+    # Initialize timers
+    player1_timer = timedelta(seconds=60) 
+    player2_timer = timedelta(seconds=60)
+    start_time = datetime.now()
+
     running = True
     while running:
         for event in pygame.event.get():
@@ -209,11 +221,19 @@ def start_game():
                 running = False
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:  # Check for spacebar press
+                if event.key == pygame.K_SPACE and player1_shots > 0 and player1_timer.total_seconds() > 0:  # Check for spacebar press
                     player_shots(aim_1, targets)
+                    player1_shots -= 1
                 
-                if event.key == pygame.K_KP_0: # check for 0 keypad press
+                if event.key == pygame.K_KP_0 and player2_shots > 0 and player2_timer.total_seconds() > 0:  # check for 0 keypad press
                     player_shots(aim_2, targets)
+                    player2_shots -= 1
+
+        # Update timers
+        elapsed_time = datetime.now() - start_time
+        player1_timer -= elapsed_time
+        player2_timer -= elapsed_time
+        start_time = datetime.now()
 
         # Get pressed keys
         keys = pygame.key.get_pressed()
@@ -223,12 +243,19 @@ def start_game():
         # Draw background
         screen.fill(DARK_BG)
 
-        # Draw player names
+        # Draw player names, shot counts, and timers
         font = pygame.font.Font(None, 25)
-        player1_text = font.render(f"Player 1: {player1_name}", True, LIGHT_GREEN)
-        player2_text = font.render(f"Player 2: {player2_name}", True, LIGHT_BLUE)
+        player1_text = font.render(f"Player 1: {player1_name} - Bullets: {player1_shots} - Timer: {player1_timer.seconds}", True, LIGHT_GREEN)
         screen.blit(player1_text, (20, 20))
-        screen.blit(player2_text, (20, 60))
+        player2_text = font.render(f"Player 2: {player2_name} - Bullets: {player2_shots} - Timer: {player2_timer.seconds}", True, LIGHT_BLUE)
+        screen.blit(player2_text, (WIDTH - 370, 20))  
+
+        # Check if time is up or both players are out of shots
+        if (player1_timer.total_seconds() <= 0 and player2_timer.total_seconds() <= 0) or (player1_shots <= 0 and player2_shots <= 0):
+            running = False
+            print("Game Over!")
+            print(f"{player1_name} shots: {15 - player1_shots}")
+            print(f"{player2_name} shots: {15 - player2_shots}")
 
         # Draw objects
         aim_1.draw()
