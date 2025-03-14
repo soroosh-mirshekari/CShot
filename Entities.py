@@ -72,12 +72,13 @@ class Aim(Entity):
         return(self.__x,self.__y)
 
     def last_shot(self):
-        return self.__shots_xy[-2]
+        return self.__shots_xy[len(self.__shots_xy)-2]
 
 class Target(Entity):
     def __init__(self, border_thickness, width, height, screen):
         super().__init__(border_thickness, width, height, screen)
         self.rect = None
+        self.random_placement()
 
     def random_placement(self):
         self.__x = randint(self._border_thickness*2, self._width - 5*self._border_thickness)
@@ -91,5 +92,49 @@ class Target(Entity):
         self.rect = target_image.get_rect()
         self.rect.x = self.__x
         self.rect.y = self.__y
+        # draw
+        self._screen.blit(target_image, self.rect)
+
+    @property
+    def x(self):
+        return self.__x
+
+    @property
+    def y(self):
+        return self.__y
+
+class AmmoTarget(Target):
+    def __init__(self, border_thickness, width, height, screen):
+        super().__init__(border_thickness, width, height, screen)
+        self.rect = None
+        self.random_placement()
+        
+
+    def draw(self):
+        target_image = pygame.image.load("ammo.png").convert_alpha()  # Load target image
+        target_image = pygame.transform.scale(target_image, (50, 50)) #resizes the image
+
+        # create a rect 
+        self.rect = target_image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+        # draw
+        self._screen.blit(target_image, self.rect)
+
+class TimerTarget(Target):
+    def __init__(self, border_thickness, width, height, screen):
+        super().__init__(border_thickness, width, height, screen)
+        self.rect = None
+        self.random_placement()
+        
+
+    def draw(self):
+        target_image = pygame.image.load("chronometer.png").convert_alpha()  # Load target image
+        target_image = pygame.transform.scale(target_image, (50, 50)) #resizes the image
+
+        # create a rect 
+        self.rect = target_image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
         # draw
         self._screen.blit(target_image, self.rect)
