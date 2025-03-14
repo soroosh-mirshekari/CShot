@@ -214,12 +214,16 @@ def start_game():
     target_2 = Target(BORDER_THICKNESS, WIDTH, HEIGHT, screen)
     target_3 = Target(BORDER_THICKNESS, WIDTH, HEIGHT, screen)
     targets = [target_1, target_2, target_3]
+    timer = TimerTarget(BORDER_THICKNESS, WIDTH, HEIGHT, screen)
+    ammo = AmmoTarget(BORDER_THICKNESS, WIDTH, HEIGHT, screen)
 
     # Randomly place aims and targets
     aim_1.random_placement()
     aim_2.random_placement()
     for target in targets:
         target.random_placement()
+    ammo.random_placement()
+    timer.random_placement()
 
     # Initialize shot counters
     player1_shots = 15 
@@ -232,9 +236,14 @@ def start_game():
     player2_missed = True
 
     # Initialize timers
-    player1_timer = timedelta(seconds=160) 
-    player2_timer = timedelta(seconds=160)
+    player1_timer = timedelta(seconds=35) 
+    player2_timer = timedelta(seconds=35)
     start_time = datetime.now()
+
+    ammo_activated = False
+    timer_activated = False
+    ammo_used = False
+    timer_used = False
 
     running = True
     while running:
@@ -247,25 +256,55 @@ def start_game():
                     if player_shots(aim_1, targets):
                         if player1_missed:
                             score1 += score_scale(aim_1)
-                        else: score1 += score_scale(aim_1) #+ 2
+                        else: score1 += score_scale(aim_1) + 2
                         player1_missed = False
                     else: player1_missed = True
+
+                    # check if player hits ammo box 
+                    if ammo_activated and aim_1.check_collision(ammo):
+                        ammo_used = True
+                        player1_shots += 6
+
+                    # check if player hits timer
+                    if timer_activated and aim_1.check_collision(timer):
+                        timer_used = True
+                        player1_timer += timedelta(seconds=15)
+
                     player1_shots -= 1
-                
+
                 if event.key == pygame.K_KP_0 and player2_shots > 0 and player2_timer.total_seconds() > 0:  # check for 0 keypad press
                     if player_shots(aim_2, targets):
                         if player2_missed:
                             score2 += score_scale(aim_2)
-                        else: score2 += score_scale(aim_2) #+ 2
+                        else: score2 += score_scale(aim_2) + 2
                         player2_missed = False
                     else: player2_missed = True
+
+                    # check if player hits ammo box 
+                    if ammo_activated and aim_2.check_collision(ammo):
+                        ammo_used = True
+                        player2_shots += 6
+
+                    # check if player hits timer
+                    if timer_activated and aim_2.check_collision(timer):
+                        timer_used = True
+                        player2_timer.seconds += timedelta(seconds=15)
+
                     player2_shots -= 1
+
+        if player1_shots <= 5 and player2_shots <= 5:
+            ammo_activated = True
+
+        if player1_timer.seconds <= 30 and player2_timer.seconds <= 30:
+            timer_activated = True
 
         # Update timers
         elapsed_time = datetime.now() - start_time
         player1_timer -= elapsed_time
         player2_timer -= elapsed_time
         start_time = datetime.now()
+        if player1_timer.total_seconds() <= 0: player1_timer = timedelta(seconds=0)
+        if player2_timer.total_seconds() <= 0: player2_timer = timedelta(seconds=0)
 
         # Get pressed keys
         keys = pygame.key.get_pressed()
@@ -283,7 +322,7 @@ def start_game():
         screen.blit(player2_text, (WIDTH - 380, 20))  
 
         # Check if time is up or both players are out of shots
-        if (player1_timer.total_seconds() <= 0 and player2_timer.total_seconds() <= 0) or (player1_shots <= 0 and player2_shots <= 0):
+        if (player1_timer.total_seconds() <= 0 and player2_timer.total_seconds() <= 0) or (player1_shots <= 0 and player2_shots <= 0) or (player1_timer.total_seconds() <= 0 and player2_shots <= 0) or (player2_timer.total_seconds() <= 0 and player1_shots <= 0):
             running = False
             print("Game Over!")
             print(f"{player1_name} shots: {15 - player1_shots}")
@@ -294,7 +333,12 @@ def start_game():
         aim_2.draw()
         for target in targets:
             target.draw()
-
+        
+        if not ammo_used and ammo_activated:
+            ammo.draw()
+        if not timer_used and timer_activated:
+            timer.draw()
+        
         # Update the display
         pygame.display.flip()
 
