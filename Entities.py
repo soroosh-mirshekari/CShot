@@ -81,8 +81,8 @@ class Target(Entity):
         self.random_placement()
 
     def random_placement(self):
-        self.__x = randint(self._border_thickness*2, self._width - 5*self._border_thickness)
-        self.__y = randint(self._border_thickness*2, self._height - 5*self._border_thickness)
+        self.__x = randint(self._border_thickness*10, self._width - 10*self._border_thickness)
+        self.__y = randint(self._border_thickness*10, self._height - 10*self._border_thickness)
 
     def draw(self):
         target_image = pygame.image.load("target_icon.png").convert_alpha()  # Load target image
