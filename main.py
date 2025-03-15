@@ -335,19 +335,19 @@ def start_game():
                     else: player1_missed = True
 
                     # check if player hits ammo box 
-                    if ammo_activated and aim_1.check_collision(ammo):
+                    if not ammo_used and ammo_activated and aim_1.check_collision(ammo):
                         ammo_used = True
                         player1_shots += 6
                         ammo_sound.play()
 
                     # check if player hits timer
-                    if timer_activated and aim_1.check_collision(timer):
+                    if not timer_used and timer_activated and aim_1.check_collision(timer):
                         timer_used = True
                         player1_timer += timedelta(seconds=15)
                         time_sound.play()
 
                     # check if player hits multiplier
-                    if multiplier_activated and aim_1.check_collision(multiplier):
+                    if not multiplier_used and multiplier_activated and aim_1.check_collision(multiplier):
                         multiplier_used = True
                         player1_multiplier = 2
                         multiplier_start_timer = datetime.now()
@@ -365,19 +365,19 @@ def start_game():
                     else: player2_missed = True
 
                     # check if player hits ammo box 
-                    if ammo_activated and aim_2.check_collision(ammo):
+                    if not ammo_used and ammo_activated and aim_2.check_collision(ammo):
                         ammo_used = True
                         player2_shots += 6
                         ammo_sound.play()
 
                     # check if player hits timer
-                    if timer_activated and aim_2.check_collision(timer):
+                    if not timer_used and timer_activated and aim_2.check_collision(timer):
                         timer_used = True
                         player2_timer += timedelta(seconds=15)
                         time_sound.play()
 
                     # check if player hits multiplier
-                    if multiplier_activated and aim_2.check_collision(multiplier):
+                    if not multiplier_used and multiplier_activated and aim_2.check_collision(multiplier):
                         multiplier_used = True
                         player2_multiplier = 2
                         multiplier_start_timer = datetime.now()
