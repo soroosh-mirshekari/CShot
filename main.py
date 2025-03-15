@@ -15,12 +15,18 @@ shoot_sound = pygame.mixer.Sound("shoot_sound.mp3")
 target_destroyed_sound = pygame.mixer.Sound("target_destroyed.mp3")
 game_over_sound = pygame.mixer.Sound("game_over.mp3")
 game_start_sound = pygame.mixer.Sound("ready_start.mp3")
+ammo_sound = pygame.mixer.Sound("gun_reload.mp3")
+time_sound = pygame.mixer.Sound("tick_clock.mp3")
+multiplier_sound = pygame.mixer.Sound("boost.mp3")
 
 # Adjust volumes (optional)
 shoot_sound.set_volume(0.5)
 target_destroyed_sound.set_volume(0.7)
-game_over_sound.set_volume(1.0)
-game_start_sound.set_volume(1.0)
+game_over_sound.set_volume(1.5)
+game_start_sound.set_volume(1.5)
+ammo_sound.set_volume(0.8)
+time_sound.set_volume(5.0)
+multiplier_sound.set_volume(0.8)
 
 
 # Colors
@@ -332,17 +338,20 @@ def start_game():
                     if ammo_activated and aim_1.check_collision(ammo):
                         ammo_used = True
                         player1_shots += 6
+                        ammo_sound.play()
 
                     # check if player hits timer
                     if timer_activated and aim_1.check_collision(timer):
                         timer_used = True
                         player1_timer += timedelta(seconds=15)
+                        time_sound.play()
 
                     # check if player hits multiplier
                     if multiplier_activated and aim_1.check_collision(multiplier):
                         multiplier_used = True
                         player1_multiplier = 2
                         multiplier_start_timer = datetime.now()
+                        multiplier_sound.play()
                         
 
                     player1_shots -= 1
@@ -359,17 +368,20 @@ def start_game():
                     if ammo_activated and aim_2.check_collision(ammo):
                         ammo_used = True
                         player2_shots += 6
+                        ammo_sound.play()
 
                     # check if player hits timer
                     if timer_activated and aim_2.check_collision(timer):
                         timer_used = True
                         player2_timer += timedelta(seconds=15)
+                        time_sound.play()
 
                     # check if player hits multiplier
                     if multiplier_activated and aim_2.check_collision(multiplier):
                         multiplier_used = True
                         player2_multiplier = 2
                         multiplier_start_timer = datetime.now()
+                        multiplier_sound.play()
 
 
                     player2_shots -= 1
