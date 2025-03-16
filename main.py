@@ -48,6 +48,7 @@ AIM1_COLOR = (255, 0, 0)
 AIM2_COLOR = (0, 255, 0)  
 AIM_SIZE = 2
 AIM_SPEED = 1.5
+GOLD = (255, 215, 0)
 
 # Fonts
 TITLE_FONT = pygame.font.Font(None, 100)
@@ -457,11 +458,48 @@ def start_game():
     create_player(name = player2_name,score = score2)
 
 def leaderboard():
-    print("Leaderboard")
+
     players_data = select_players()
-    for player in players_data:
-        print(player["name"], player["score"])
-    pygame.time.wait(400)
+    
+    # Sort players by score in descending order
+    sorted_players = sorted(players_data, key=lambda x: x["score"], reverse=True)
+    
+    title_font = pygame.font.Font(None, 60)
+    header_font = pygame.font.Font(None, 40)
+    player_font = pygame.font.Font(None, 30)
+        
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                running = False  # Exit the leaderboard on any key press or mouse click
+        
+        # Draw a golden gradient background
+        for y in range(HEIGHT):
+            gradient_gold = 255, min(255, 215 + int(y / HEIGHT * 40)), min(255, int(y / HEIGHT * 100))
+            pygame.draw.line(screen, gradient_gold, (0, y), (WIDTH, y))
+        
+        title_surface = title_font.render("Leaderboard", True, BLACK)
+        screen.blit(title_surface, (WIDTH // 2 - title_surface.get_width() // 2, 50))
+        
+        header_surface = header_font.render("Rank   Name   Score", True, BLACK)
+        screen.blit(header_surface, (WIDTH // 2 - header_surface.get_width() // 2, 150))
+        
+        for i, player in enumerate(sorted_players[:10]):  # Display the top 10 players
+            rank = i + 1
+            name = player["name"]
+            score = player["score"]
+            
+            player_text = f"{rank}. {name} - {score}"
+            player_surface = player_font.render(player_text, True, BLACK)
+            screen.blit(player_surface, (WIDTH // 2 - player_surface.get_width() // 2, 200 + i * 40))
+        
+        instruction_surface = player_font.render("Press any key to return to the main menu", True, BLACK)
+        screen.blit(instruction_surface, (WIDTH // 2 - instruction_surface.get_width() // 2, HEIGHT - 100))
+        
+        pygame.display.flip()
 
 def main_menu():
     global is_music_paused 
