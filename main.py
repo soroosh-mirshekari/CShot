@@ -2,6 +2,7 @@ import pygame
 import sys
 from Entities import *
 from datetime import datetime, timedelta
+from DbContext import create_player, select_players
 
 pygame.init()
 
@@ -452,8 +453,14 @@ def start_game():
         # Update the display
         pygame.display.flip()
 
+    create_player(name = player1_name,score = score1)
+    create_player(name = player2_name,score = score2)
+
 def leaderboard():
     print("Leaderboard")
+    players_data = select_players()
+    for player in players_data:
+        print(player["name"], player["score"])
     pygame.time.wait(400)
 
 def main_menu():
