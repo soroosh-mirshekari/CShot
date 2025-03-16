@@ -481,13 +481,13 @@ def leaderboard():
             gradient_gold = 255, min(255, 215 + int(y / HEIGHT * 40)), min(255, int(y / HEIGHT * 100))
             pygame.draw.line(screen, gradient_gold, (0, y), (WIDTH, y))
         
-        title_surface = title_font.render("Leaderboard", True, BLACK)
+        title_surface = title_font.render("Leaderboard", True, DARK_GREEN)
         screen.blit(title_surface, (WIDTH // 2 - title_surface.get_width() // 2, 50))
         
         header_surface = header_font.render("Rank   Name   Score", True, BLACK)
         screen.blit(header_surface, (WIDTH // 2 - header_surface.get_width() // 2, 150))
         
-        for i, player in enumerate(sorted_players[:10]):  # Display the top 10 players
+        for i, player in enumerate(sorted_players[:5]):  # Display the top 5 players
             rank = i + 1
             name = player["name"]
             score = player["score"]
@@ -496,7 +496,7 @@ def leaderboard():
             player_surface = player_font.render(player_text, True, BLACK)
             screen.blit(player_surface, (WIDTH // 2 - player_surface.get_width() // 2, 200 + i * 40))
         
-        instruction_surface = player_font.render("Press any key to return to the main menu", True, BLACK)
+        instruction_surface = player_font.render("Press any key to return to the main menu", True, DARK_GREEN)
         screen.blit(instruction_surface, (WIDTH // 2 - instruction_surface.get_width() // 2, HEIGHT - 100))
         
         pygame.display.flip()
