@@ -57,7 +57,8 @@ class Aim(Entity):
         self.__rect.center = (self.__x, self.__y) #update the rect
 
     def draw(self):  # Draw aim
-        pygame.draw.circle(self._screen, self.__color, (int(self.__x), int(self.__y)), self.__size)
+        # removed this line so aim is visible only on shots
+        # pygame.draw.circle(self._screen, self.__color, (int(self.__x), int(self.__y)), self.__size)
 
         for shot_x, shot_y in self.__shots_xy: # draw shots 
             pygame.draw.circle(self._screen, self.__color, (shot_x, shot_y), self.__size)

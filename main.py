@@ -296,8 +296,8 @@ def start_game():
     game_start_sound.play()
 
     # Initialize shot counters
-    player1_shots = 15 
-    player2_shots = 15
+    player1_shots = 25
+    player2_shots = 25
 
     # players score
     score1 = 0
@@ -308,8 +308,8 @@ def start_game():
     player2_multiplier = 1
 
     # Initialize timers
-    player1_timer = timedelta(seconds=60) 
-    player2_timer = timedelta(seconds=60)
+    player1_timer = timedelta(seconds=90) 
+    player2_timer = timedelta(seconds=90)
     start_time = datetime.now()
 
     ammo_activated = False
@@ -388,6 +388,7 @@ def start_game():
 
                     player2_shots -= 1
 
+        # how bonus targets activate
         if player1_shots <= 5 and player2_shots <= 5:
             ammo_activated = True
 
